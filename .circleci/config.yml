@@ -41,60 +41,11 @@ jobs:
       - checkout
       - python/greet
 
-  tag-commit:
-    executor: ci-base
-    steps:
-      - checkout
-
-      - add_ssh_keys:
-          fingerprints:
-            - "62:e3:c9:56:92:9d:f3:45:4a:db:49:ed:fc:97:3b:a6"
-
-      - orb-tools/configure-git
-
-      - run:
-          name: git tag
-          command: |
-            VERSION=$(cat src/version.txt)
-            if [ "$CIRCLE_BRANCH" = "main" ]; then
-              INTEGRATION_TAG=$VERSION
-            else
-              INTEGRATION_TAG=${CIRCLE_SHA1:0:7}-$VERSION
-            fi
-            git tag $INTEGRATION_TAG
-            git push origin $INTEGRATION_TAG
-
-  capture-tag:
-    executor: ci-base
-    steps:
-      - checkout
-
-      - run:
-          name: capture tag
-          command: |
-              if git describe --tags $(git rev-parse HEAD); then
-                mkdir -p workspace
-                echo 'export CIRCLE_TAG="$(git describe --tags $(git rev-parse HEAD))"' >> workspace/env-var
-              else
-                echo "$(git rev-parse HEAD) is not a tagged commit."
-              fi
-
-      - persist_to_workspace:
-          root: workspace
-          paths: env-var
-
 # yaml anchor filters
 integration_filter: &integration_filter
   filters:
     branches:
       only: /(develop|main)/
-
-release_filter: &release_filter
-  filters:
-    branches:
-      only: main
-    tags:
-      only: /^(major|minor|patch)-release-v\d+\.\d+\.\d+$/
 
 workflows:
   version: 2
@@ -105,23 +56,12 @@ workflows:
 
       - orb-tools/pack
 
-      - hold-for-dev-publish:
-          type: approval
-          requires:
-            - orb-tools/lint
-            - orb-tools/pack
-          <<: *integration_filter
-
-      - tag-commit:
-          requires:
-            - hold-for-dev-publish
-          <<: *integration_filter
-
       - orb-tools/publish-dev:
           orb-name: rdgozum/python
           context: orb-publishing
           requires:
-            - tag-commit
+            - orb-tools/lint
+            - orb-tools/pack
           <<: *integration_filter
 
       - orb-tools/trigger-integration-tests-workflow:
@@ -137,19 +77,15 @@ workflows:
       - integration-test-1:
           <<: *integration_filter
 
-      - capture-tag:
-          requires:
-            - integration-test-1
-          <<: *integration_filter
-
-      - orb-tools/dev-promote-prod-from-git-tag:
-          orb-name: rdgozum/python
+      - orb-tools/dev-promote-prod-from-commit-subject:
+          orb-name: rdgozum/circleci-orb-playground
           context: orb-publishing
           add-pr-comment: false
-          checkout: false
-          required-branch: main
-          pre-steps:
-            - capture-tag
+          fail-if-semver-not-indicated: true
+          publish-version-tag: true
+          ssh-fingerprints: "62:e3:c9:56:92:9d:f3:45:4a:db:49:ed:fc:97:3b:a6"
           requires:
-            - capture-tag
-          <<: *release_filter
+            - integration-test-1
+          filters:
+            branches:
+              only: main
