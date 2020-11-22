@@ -7,7 +7,7 @@ orbs:
 executors:
   ci-base:
     docker:
-      - image: cibuilds/base
+      - image: cimg/base:2020.01
 
 # Pipeline Parameters
 parameters:
@@ -24,16 +24,6 @@ parameters:
     type: string
     default: "dev:alpha"
 
-commands:
-  capture-tag:
-    steps:
-      - checkout
-      - attach_workspace:
-          at: ./workspace
-      - run: cat workspace/env-var >> $BASH_ENV
-      - run: source $BASH_ENV
-      - run: echo $CIRCLE_TAG
-
 jobs:
   integration-test-1:
     executor: ci-base
@@ -45,7 +35,15 @@ jobs:
 integration_filter: &integration_filter
   filters:
     branches:
-      only: /(develop|main)/
+      only:
+        - develop
+        - main
+
+main_filter: &main_filter
+  filters:
+    branches:
+      only:
+        - main
 
 workflows:
   version: 2
@@ -86,6 +84,4 @@ workflows:
           ssh-fingerprints: "62:e3:c9:56:92:9d:f3:45:4a:db:49:ed:fc:97:3b:a6"
           requires:
             - integration-test-1
-          filters:
-            branches:
-              only: main
+          <<: *main_filter
