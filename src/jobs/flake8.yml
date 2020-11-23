@@ -1,0 +1,27 @@
+description: >
+  Perform flake8 validation on python files.
+
+executor: << parameters.executor >>
+
+parameters:
+  checkout:
+      default: true
+      description: |
+          Boolean for whether or not to checkout as a first step. Defaults to true.
+      type: boolean
+  executor:
+    default: flake8
+    description: The docker container to use for flake8 validation on python files. Defaults to flake8.
+    type: executor
+  src:
+    default: src
+    description: Path to the directory containing the python files. Defaults to src.
+    type: string
+
+steps:
+    - when:
+        condition: << parameters.checkout >>
+        steps:
+            - checkout
+    - flake8:
+        src: << parameters.src >>
