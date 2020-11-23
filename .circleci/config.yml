@@ -65,17 +65,17 @@ workflows:
     jobs:
       # integration test for linters
       - python/black:
-          src: src/python
+          src: ./src/python
           <<: *integration_filter
 
       - python/flake8:
-          src: src/python
+          src: ./src/python
           requires:
             - python/black
           <<: *integration_filter
 
       - python/pylint:
-          src: src/python
+          src: ./src/python
           requires:
             - python/black
           <<: *integration_filter

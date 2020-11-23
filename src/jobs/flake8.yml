@@ -14,8 +14,8 @@ parameters:
     description: The docker container to use for flake8 validation on python files. Defaults to flake8.
     type: executor
   src:
-    default: src
-    description: Path to the directory containing the python files. Defaults to src.
+    default: .
+    description: Path to the directory containing the python files. Defaults to the project's root directory.
     type: string
 
 steps:
