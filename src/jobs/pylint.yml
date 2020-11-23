@@ -14,8 +14,8 @@ parameters:
     description: The docker container to use for pylint validation on python files.
     type: executor
   src:
-    default: src
-    description: Path to the directory containing the python files. Defaults to src.
+    default: .
+    description: Path to the directory containing the python files. Defaults to the project's root directory.
     type: string
 
 steps:
