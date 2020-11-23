@@ -1,0 +1,10 @@
+description: >
+  Run black command on specified src.
+parameters:
+  src:
+    default: src
+    description: Path to the directory containing the python files.
+    type: string
+steps:
+  - run: pip install black
+  - run: black << parameters.src >>
