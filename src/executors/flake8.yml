@@ -1,0 +1,9 @@
+description: >
+    The docker container to use for flake8 validation on python files.
+docker:
+    - image: alpine/flake8:<< parameters.tag >>
+parameters:
+    tag:
+        default: 3.8.4
+        description: Docker tag
+        type: string

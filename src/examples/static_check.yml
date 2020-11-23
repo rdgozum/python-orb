@@ -1,0 +1,13 @@
+description: >
+  Perform linting on python files using flake8, pylint, and black.
+
+usage:
+  version: 2.1
+  orbs:
+    python: rdgozum/python@x.y.z
+  workflows:
+    main:
+      jobs:
+        - python/flake8
+        - python/pylint
+        - python/black
