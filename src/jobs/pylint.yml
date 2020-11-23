@@ -1,0 +1,27 @@
+description: >
+  Perform pylint validation on python files.
+
+executor: << parameters.executor >>
+
+parameters:
+  checkout:
+      default: true
+      description: |
+          Boolean for whether or not to checkout as a first step. Defaults to true.
+      type: boolean
+  executor:
+    default: default
+    description: The docker container to use for pylint validation on python files.
+    type: executor
+  src:
+    default: src
+    description: Path to the directory containing the python files. Defaults to src.
+    type: string
+
+steps:
+    - when:
+        condition: << parameters.checkout >>
+        steps:
+            - checkout
+    - pylint:
+        src: << parameters.src >>

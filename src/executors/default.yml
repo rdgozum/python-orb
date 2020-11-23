@@ -1,0 +1,9 @@
+description: >
+    The docker container default for python.
+docker:
+    - image: circleci/python:<< parameters.version >>
+parameters:
+    version:
+        default: 2.7.15
+        description: Python version for executor
+        type: string

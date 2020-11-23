@@ -63,8 +63,12 @@ workflows:
   integration-test_publish-prod:
     when: << pipeline.parameters.run-integration-tests >>
     jobs:
-      # Integration tests
+      # Integration Test for linters
       - python/flake8:
+          src: src/python
+          <<: *integration_filter
+
+      - python/pylint:
           src: src/python
           <<: *integration_filter
 
