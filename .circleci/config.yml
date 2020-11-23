@@ -53,7 +53,6 @@ workflows:
           requires:
             - orb-tools/lint
             - orb-tools/pack
-          <<: *integration_filter
 
       - orb-tools/trigger-integration-tests-workflow:
           name: trigger-integration-dev
@@ -64,7 +63,7 @@ workflows:
   integration-test_publish-prod:
     when: << pipeline.parameters.run-integration-tests >>
     jobs:
-      # Integration Test for linters
+      # integration test for linters
       - python/black:
           src: src/python
           <<: *integration_filter
