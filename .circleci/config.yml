@@ -11,11 +11,6 @@ executors:
 
 # Pipeline Parameters
 parameters:
-  run-integration-tests:
-    description: An internal flag to prevent integration test from running before a development version has been created.
-    type: boolean
-    default: false
-
   dev-orb-version:
     description: >
       The development version of the orb to test.
@@ -24,12 +19,10 @@ parameters:
     type: string
     default: "dev:alpha"
 
-jobs:
-  integration-test-1:
-    executor: ci-base
-    steps:
-      - checkout
-      - python/greet
+  run-integration-tests:
+    description: An internal flag to prevent integration test from running before a development version has been created.
+    type: boolean
+    default: false
 
 # yaml anchor filters
 integration_filter: &integration_filter
@@ -67,12 +60,25 @@ workflows:
           context: orb-publishing
           requires:
             - orb-tools/publish-dev
-          <<: *integration_filter
 
   integration-test_publish-prod:
     when: << pipeline.parameters.run-integration-tests >>
     jobs:
-      - integration-test-1:
+      # Integration Test for linters
+      - python/black:
+          src: src/python
+          <<: *integration_filter
+
+      - python/flake8:
+          src: src/python
+          requires:
+            - python/black
+          <<: *integration_filter
+
+      - python/pylint:
+          src: src/python
+          requires:
+            - python/black
           <<: *integration_filter
 
       - orb-tools/dev-promote-prod-from-commit-subject:
@@ -83,5 +89,6 @@ workflows:
           publish-version-tag: true
           ssh-fingerprints: "62:e3:c9:56:92:9d:f3:45:4a:db:49:ed:fc:97:3b:a6"
           requires:
-            - integration-test-1
+            - python/flake8
+            - python/pylint
           <<: *main_filter

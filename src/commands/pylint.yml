@@ -1,0 +1,11 @@
+description: >
+  Run pylint command on specified src.
+parameters:
+  src:
+    default: src
+    description: Path to the directory containing the python files.
+    type: string
+steps:
+  - run: pip install --user --upgrade pip
+  - run: pip install --user pylint
+  - run: pylint << parameters.src >>
